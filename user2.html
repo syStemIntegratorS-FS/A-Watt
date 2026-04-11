@@ -17,6 +17,8 @@
 }
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
 .devices { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; }
+.admin-badge { background: linear-gradient(135deg, var(--accent), var(--accent-dk)); color: #fff; font-size:.65rem; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; }
+
 
 .card { 
   background: var(--bg2); 
@@ -74,7 +76,11 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 </head>
 <body>
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <h1> IDF Box Live Status</h1>
+    <h1>
+       <a href="https://www.alto.com.ph/src/ALTO_SIGN-header.png">
+        <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="60" height="60">
+    </a>PAVIA ERMS</h1>
+    <span class="admin-badge">Power Monitoring</span>
     <div id="mqtt-status" style="font-size:0.8rem; color:gray;">Connecting...</div>
   </div>
 
