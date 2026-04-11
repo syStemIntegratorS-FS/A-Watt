@@ -6,37 +6,106 @@
 <title>ALTO Power Monitor — Status</title>
 <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 <style>
+/* Using your established Azure Blue theme */
 :root {
   --accent:     #1E88E5;
+  --accent-dk:  #0d47a1;
   --bg:         #07090f;
   --bg2:        rgba(12,18,32,0.95);
   --text:       #ffffff;
   --online:     #4caf50;
   --offline:    #f44336;
   --radius:     18px;
+  --muted:      rgba(255,255,255,0.6);
 }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-.devices { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; }
-.admin-badge { background: linear-gradient(135deg, var(--accent), var(--accent-dk)); color: #fff; font-size:.65rem; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; }
 
+body { 
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+  background: var(--bg); 
+  color: var(--text); 
+  padding: 20px;
+  margin: 0;
+}
+
+/* Centered & Aesthetic Header */
+.main-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--bg2);
+  border: 1px solid rgba(30,136,229,0.2);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 30px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.logo-link {
+  display: block;
+  transition: transform 0.3s ease;
+  margin-bottom: 12px;
+}
+
+.logo-link:hover { transform: scale(1.05); }
+
+.brand-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin: 0 0 10px 0;
+  background: linear-gradient(135deg, #fff, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-badge { 
+  background: linear-gradient(135deg, var(--accent), var(--accent-dk)); 
+  color: #fff; 
+  font-size: .65rem; 
+  font-weight: 700; 
+  padding: 4px 12px; 
+  border-radius: 20px; 
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#mqtt-status { font-size: 0.8rem; color: var(--muted); }
+
+/* Device Grid Layout */
+.devices { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+  gap: 20px; 
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
 .card { 
   background: var(--bg2); 
-  border: 1px solid rgba(30,136,229,0.3); 
+  border: 1px solid rgba(30,136,229,0.2); 
   border-radius: var(--radius); 
   padding: 20px; 
   border-left: 6px solid var(--online); 
-  transition: 0.3s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+.card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(30,136,229,0.2); }
 .card.offline { border-left-color: var(--offline); opacity: 0.8; }
 
-/* Horizontal Status Layout */
 .status-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: rgba(255,255,255,0.03);
-  padding: 12px;
+  padding: 15px;
   border-radius: 12px;
   margin: 15px 0;
   gap: 10px;
@@ -50,18 +119,13 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 }
 
 .status-val { font-size: 1.1rem; font-weight: 800; }
-.status-lbl { font-size: 0.65rem; text-transform: uppercase; opacity: 0.6; margin-top: 2px; }
-
-/* Status Color Logic */
-.online .status-val.sys { color: var(--online); }
-.offline .status-val.sys { color: var(--offline); }
+.status-lbl { font-size: 0.65rem; text-transform: uppercase; opacity: 0.6; margin-top: 4px; }
 .env { color: var(--accent); }
 
 /* Blinking Door Logic */
 .door-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
-.door-icon { font-size: 1.4rem; transition: 0.3s; }
+.door-icon { font-size: 1.5rem; margin-bottom: 2px; }
 
-/* Breached Animation */
 .breached .door-icon { 
   color: var(--offline); 
   animation: blink-red 0.8s infinite; 
@@ -75,14 +139,17 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 </style>
 </head>
 <body>
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <h1>
-       <a href="https://www.alto.com.ph/src/ALTO_SIGN-header.png">
-        <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="60" height="60">
-    </a>PAVIA ERMS</h1>
-    <span class="admin-badge">Power Monitoring</span>
-    <div id="mqtt-status" style="font-size:0.8rem; color:gray;">Connecting...</div>
-  </div>
+
+  <header class="main-header">
+    <a href="https://www.alto.com.ph/src/ALTO_SIGN-header.png" class="logo-link">
+      <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="80" height="80">
+    </a>
+    <h1 class="brand-title">PAVIA ERMS</h1>
+    <div class="header-meta">
+      <span class="admin-badge">Power Monitoring</span>
+      <div id="mqtt-status">Connecting...</div>
+    </div>
+  </header>
 
   <div id="grid" class="devices"></div>
 
@@ -115,9 +182,9 @@ function render() {
     return `
     <div class="card ${d.status}">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-weight:bold; opacity:0.7;">📡 ${d.device}</span>
-        <span style="font-size:0.7rem; font-weight:bold; color:${d.status === 'online' ? 'var(--online)' : 'var(--offline)'}">
-          ${d.status.toUpperCase()}
+        <span style="font-weight:bold; opacity:0.8; letter-spacing:1px;">📡 ${d.device}</span>
+        <span style="font-size:0.7rem; font-weight:900; color:${d.status === 'online' ? 'var(--online)' : 'var(--offline)'}">
+          ● ${d.status.toUpperCase()}
         </span>
       </div>
       
@@ -136,8 +203,8 @@ function render() {
         </div>
       </div>
 
-      <div style="margin-top:10px; font-size:0.75rem; color:gray; text-align:right;">
-        Update: ${new Date(d.lastSeen).toLocaleTimeString()}
+      <div style="margin-top:10px; font-size:0.7rem; color:var(--muted); text-align:right; font-family:monospace;">
+        SYNC: ${new Date(d.lastSeen).toLocaleTimeString()}
       </div>
     </div>`;
   }).join('');
@@ -145,7 +212,7 @@ function render() {
 
 const client = mqtt.connect(CFG.broker, {username: CFG.user, password: CFG.pass});
 client.on('connect', () => {
-  document.getElementById('mqtt-status').innerText = '🟢 Connected';
+  document.getElementById('mqtt-status').innerText = '🟢 NETWORK LIVE';
   client.subscribe(CFG.topic);
 });
 client.on('message', (t, m) => {
