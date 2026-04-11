@@ -28,16 +28,43 @@
 body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; padding: 18px; }
 .wrap { max-width:1600px; margin:0 auto; position:relative; z-index:1; }
 
-/* HEADER */
-.header { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 24px; margin-bottom: var(--gap); display: flex; justify-content: space-between; align-items: center; }
+/* HEADER - Centered Logo/Name Layout */
+.header { 
+  background: var(--bg2); 
+  border: 1px solid var(--border); 
+  border-radius: var(--radius); 
+  padding: 24px; 
+  margin-bottom: var(--gap); 
+  display: flex; 
+  flex-direction: column;
+  align-items: center; 
+  text-align: center;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 5px;
+}
+
+.header h1 { font-size: 1.8rem; margin: 0; }
+
+.header-bottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 5px;
+}
+
 .admin-badge { background: linear-gradient(135deg, var(--accent), var(--accent-dk)); color: #fff; font-size:.65rem; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; }
 
-/* DEVICE GRID */
+/* DEVICE GRID (Untouched) */
 .devices { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:16px; margin-bottom: 20px; }
 .card { background:var(--bg2); border:1px solid var(--border); border-left:4px solid var(--online); border-radius:var(--radius); padding:18px; transition: 0.3s; }
 .card.offline { border-left-color: var(--offline); background:rgba(50,18,18,0.6); }
 
-/* TIME MONITORING STYLES */
+/* TIME MONITORING STYLES (Untouched) */
 .time-metric { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .time-metric b { font-family: var(--mono); color: var(--accent); }
 .response-timer { color: var(--online); font-weight: bold; }
@@ -56,14 +83,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <body>
 <div class="wrap">
   <header class="header">
-    <div>
-      <h1>
-        <a href="https://www.alto.com.ph/src/ALTO_SIGN-header.png">
-        <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="50" height="50">
-    </a>Central Power & Network Monitor</h1>
-      <span class="admin-badge">Power Monitoring</span>
+    <div class="header-top">
+      <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="60" height="60">
+      <h1>Central Power & Network Monitor</h1>
     </div>
-    <div id="mqttStatus">📡 Disconnected</div>
+    <div class="header-bottom">
+      <span class="admin-badge">Power Monitoring</span>
+      <div id="mqttStatus">📡 Status: Disconnected</div>
+    </div>
   </header>
 
   <div id="devGrid" class="devices"></div>
@@ -81,13 +108,12 @@ const CFG = {
   topic: "powerstatus",
   user: "subscriber",
   pass: "Admin1234",
-  offlineMs: 5000 // Threshhold for declaring offline
+  offlineMs: 5000 
 };
 
 let devices = new Map();
 let eventLog = [];
 
-// Matches Arduino: ALIVE[0] | Name[1] | Temp[2] | Door[3] | Humidity[4]
 function parse(raw) {
   const p = raw.split('|').map(s => s.trim());
   return {
@@ -100,10 +126,9 @@ function parse(raw) {
 
 function updateDevice(parsed, raw) {
   const now = Date.now();
-  const serverTime = new Date().toLocaleTimeString(); // When the data hit the admin side
+  const serverTime = new Date().toLocaleTimeString();
   let dev = devices.get(parsed.device) || { name: parsed.device, status: 'online' };
   
-  // Logic: If device was offline and is now back, log the recovery time
   if(dev.status === 'offline') {
     addLog(`⚡ RECOVERED: ${parsed.device} reconnected at ${serverTime}`);
   }
@@ -129,17 +154,13 @@ function addLog(msg) {
 
 function formatGap(ms) {
   const totalSec = Math.floor(ms / 1000);
-  
   const hours = Math.floor(totalSec / 3600);
   const minutes = Math.floor((totalSec % 3600) / 60);
   const seconds = totalSec % 60;
-
   let result = [];
-
   if (hours > 0) result.push(`${hours}h`);
   if (minutes > 0 || hours > 0) result.push(`${minutes}m`);
   result.push(`${seconds}s`);
-
   return result.join(' ');
 }
 
@@ -183,20 +204,17 @@ function render() {
   }).join('');
 }
 
-// Live Update for the "Time Since" counters every second
 setInterval(() => {
   const now = Date.now();
   devices.forEach(d => {
     const gap = now - d.lastArrival;
-    
-    // Update the specific timer text without re-rendering the whole card
     const el = document.getElementById(`gap-${d.name}`);
     if (el) {
       el.innerText = `${formatGap(gap)} ago`;
       if (gap > CFG.offlineMs && d.status === 'online') {
         d.status = 'offline';
         addLog(`❌ ALERT: ${d.name} Response Timeout!`);
-        render(); // Full render only on status change
+        render();
       }
     }
   });
@@ -204,7 +222,7 @@ setInterval(() => {
 
 const client = mqtt.connect(CFG.broker, {username: CFG.user, password: CFG.pass});
 client.on('connect', () => { 
-  document.getElementById('mqttStatus').innerText = '📡 MQTT: Connected';
+  document.getElementById('mqttStatus').innerText = '📡 Status: Connected';
   client.subscribe(CFG.topic); 
 });
 client.on('message', (t, m) => { updateDevice(parse(m.toString()), m.toString()); });
