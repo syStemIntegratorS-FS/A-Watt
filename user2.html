@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALTO Power Monitor — Status</title>
+<script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+<style>
+:root {
+  --accent:     #1E88E5;
+  --bg:         #07090f;
+  --bg2:        rgba(12,18,32,0.95);
+  --text:       #ffffff;
+  --online:     #4caf50;
+  --offline:    #f44336;
+  --radius:     18px;
+}
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+.devices { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; }
+
+.card { 
+  background: var(--bg2); 
+  border: 1px solid rgba(30,136,229,0.3); 
+  border-radius: var(--radius); 
+  padding: 20px; 
+  border-left: 6px solid var(--online); 
+  transition: 0.3s;
+}
+.card.offline { border-left-color: var(--offline); opacity: 0.8; }
+
+/* Horizontal Status Layout */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  padding: 12px;
+  border-radius: 12px;
+  margin: 15px 0;
+  gap: 10px;
+}
+
+.status-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.status-val { font-size: 1.1rem; font-weight: 800; }
+.status-lbl { font-size: 0.65rem; text-transform: uppercase; opacity: 0.6; margin-top: 2px; }
+
+/* Status Color Logic */
+.online .status-val.sys { color: var(--online); }
+.offline .status-val.sys { color: var(--offline); }
+.env { color: var(--accent); }
+
+/* Blinking Door Logic */
+.door-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.door-icon { font-size: 1.4rem; transition: 0.3s; }
+
+/* Breached Animation */
+.breached .door-icon { 
+  color: var(--offline); 
+  animation: blink-red 0.8s infinite; 
+}
+.breached .status-val { color: var(--offline); }
+
+@keyframes blink-red { 
+  0%, 100% { opacity: 1; transform: scale(1); } 
+  50% { opacity: 0.3; transform: scale(1.2); } 
+}
+</style>
+</head>
+<body>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h1> IDF Box Live Status</h1>
+    <div id="mqtt-status" style="font-size:0.8rem; color:gray;">Connecting...</div>
+  </div>
+
+  <div id="grid" class="devices"></div>
+
+<script>
+const CFG = {
+  broker: "wss://b01384c7f4aa43c2a7950f4fd7c8bb18.s1.eu.hivemq.cloud:8884/mqtt",
+  topic: "powerstatus",
+  user: "subscriber",
+  pass: "Admin1234"
+};
+
+let devices = new Map();
+
+function parse(raw) {
+  const p = raw.split('|').map(s => s.trim());
+  return { 
+    device: p[1] || 'Unknown', 
+    temp: p[2] || '--', 
+    door: p[3] || 'NORMAL', 
+    humid: p[4] || '--',
+    lastSeen: Date.now(),
+    status: 'online'
+  };
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = [...devices.values()].map(d => {
+    const isBreached = d.door === 'ACTIVE';
+    return `
+    <div class="card ${d.status}">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:bold; opacity:0.7;">📡 ${d.device}</span>
+        <span style="font-size:0.7rem; font-weight:bold; color:${d.status === 'online' ? 'var(--online)' : 'var(--offline)'}">
+          ${d.status.toUpperCase()}
+        </span>
+      </div>
+      
+      <div class="status-row">
+        <div class="status-pill" style="border-right: 1px solid rgba(255,255,255,0.1);">
+          <span class="status-val env">${d.temp}</span>
+          <span class="status-lbl">Temp</span>
+        </div>
+        <div class="status-pill" style="border-right: 1px solid rgba(255,255,255,0.1);">
+          <span class="status-val env">${d.humid}</span>
+          <span class="status-lbl">Humid</span>
+        </div>
+        <div class="door-container ${isBreached ? 'breached' : ''}">
+          <span class="door-icon">🚪</span>
+          <span class="status-val" style="font-size:0.8rem;">${isBreached ? 'BREACHED' : 'SECURED'}</span>
+        </div>
+      </div>
+
+      <div style="margin-top:10px; font-size:0.75rem; color:gray; text-align:right;">
+        Update: ${new Date(d.lastSeen).toLocaleTimeString()}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const client = mqtt.connect(CFG.broker, {username: CFG.user, password: CFG.pass});
+client.on('connect', () => {
+  document.getElementById('mqtt-status').innerText = '🟢 Connected';
+  client.subscribe(CFG.topic);
+});
+client.on('message', (t, m) => {
+  const data = parse(m.toString());
+  devices.set(data.device, data);
+  render();
+});
+
+setInterval(() => {
+  devices.forEach(d => { if(Date.now() - d.lastSeen > 5000) d.status = 'offline'; });
+  render();
+}, 2000);
+</script>
+</body>
+</html>
