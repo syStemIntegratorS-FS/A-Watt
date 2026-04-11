@@ -57,18 +57,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <div class="wrap">
   <header class="header">
     <div>
-      <h1>IDF Performance Monitor</h1>
+      <h1>IDF Power & Network Monitor</h1>
       <span class="admin-badge">Power Monitoring</span>
     </div>
-    <div id="mqttStatus">📡 MQTT: Disconnected</div>
+    <div id="mqttStatus">📡 Disconnected</div>
   </header>
 
   <div id="devGrid" class="devices"></div>
 
   <aside class="log-panel">
-    <h3>📋 Response Incident Log</h3>
+    <h3>📋 Incident Log</h3>
     <div class="log-list" id="logList"></div>
-    <button class="btn" onclick="exportCSV()" style="margin-top:10px;">📥 Export Response Data</button>
+    <button class="btn" onclick="exportCSV()" style="margin-top:10px;">Export Response Data</button>
   </aside>
 </div>
 
@@ -102,7 +102,7 @@ function updateDevice(parsed, raw) {
   
   // Logic: If device was offline and is now back, log the recovery time
   if(dev.status === 'offline') {
-    addLog(`⚡ RECOVERY: ${parsed.device} reconnected at ${serverTime}`);
+    addLog(`⚡ RECOVERED: ${parsed.device} reconnected at ${serverTime}`);
   }
 
   dev = {
@@ -125,10 +125,20 @@ function addLog(msg) {
 }
 
 function formatGap(ms) {
-  const sec = Math.floor(ms / 1000);
-  if (sec < 60) return `${sec}s`;
-  const min = Math.floor(sec / 60);
-  return `${min}m ${sec % 60}s`;
+  const totalSec = Math.floor(ms / 1000);
+  
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+
+  let result = [];
+
+  if (hours > 0) result.push(`${hours}h`);
+  if (minutes > 0 || hours > 0) result.push(`${minutes}m`);
+  result.push(`${seconds}s`);
+
+  return result.join(' ');
+}
 }
 
 function render() {
@@ -154,7 +164,7 @@ function render() {
       </div>
 
       <div class="time-metric">
-        <span>Response Time Monitoring:</span>
+        <span>TIME OFFLINE:</span>
         <span class="${timerClass}" id="gap-${d.name}">${formatGap(gap)} ago</span>
       </div>
 
