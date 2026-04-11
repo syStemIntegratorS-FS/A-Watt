@@ -6,7 +6,7 @@
 <title>ALTO Power Monitor — Status</title>
 <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 <style>
-/* Using your established Azure Blue theme */
+/* Using established Azure Blue theme */
 :root {
   --accent:     #1E88E5;
   --accent-dk:  #0d47a1;
@@ -20,14 +20,14 @@
 }
 
 body { 
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+  font-family: 'Segoe UI', system-ui, sans-serif; 
   background: var(--bg); 
   color: var(--text); 
   padding: 20px;
   margin: 0;
 }
 
-/* Centered & Aesthetic Header */
+/* Centered Aesthetic Header */
 .main-header {
   display: flex;
   flex-direction: column;
@@ -38,54 +38,32 @@ body {
   border-radius: var(--radius);
   padding: 24px;
   margin-bottom: 30px;
-  position: relative;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.logo-link {
-  display: block;
-  transition: transform 0.3s ease;
-  margin-bottom: 12px;
-}
-
-.logo-link:hover { transform: scale(1.05); }
+.logo-link img { transition: transform 0.3s ease; }
+.logo-link:hover img { transform: scale(1.05); }
 
 .brand-title {
   font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: 2px;
-  margin: 0 0 10px 0;
+  margin: 10px 0;
   background: linear-gradient(135deg, #fff, var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.header-meta {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
 .admin-badge { 
   background: linear-gradient(135deg, var(--accent), var(--accent-dk)); 
-  color: #fff; 
-  font-size: .65rem; 
-  font-weight: 700; 
-  padding: 4px 12px; 
-  border-radius: 20px; 
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  color: #fff; font-size: .65rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
 }
-
-#mqtt-status { font-size: 0.8rem; color: var(--muted); }
 
 /* Device Grid Layout */
 .devices { 
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
   gap: 20px; 
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
 .card { 
@@ -94,12 +72,11 @@ body {
   border-radius: var(--radius); 
   padding: 20px; 
   border-left: 6px solid var(--online); 
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: 0.3s;
 }
-
-.card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(30,136,229,0.2); }
 .card.offline { border-left-color: var(--offline); opacity: 0.8; }
 
+/* Horizontal Layout for Status */
 .status-row {
   display: flex;
   justify-content: space-between;
@@ -107,8 +84,7 @@ body {
   background: rgba(255,255,255,0.03);
   padding: 15px;
   border-radius: 12px;
-  margin: 15px 0;
-  gap: 10px;
+  margin-top: 15px;
 }
 
 .status-pill {
@@ -124,7 +100,7 @@ body {
 
 /* Blinking Door Logic */
 .door-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
-.door-icon { font-size: 1.5rem; margin-bottom: 2px; }
+.door-icon { font-size: 1.5rem; }
 
 .breached .door-icon { 
   color: var(--offline); 
@@ -145,9 +121,9 @@ body {
       <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="80" height="80">
     </a>
     <h1 class="brand-title">PAVIA ERMS</h1>
-    <div class="header-meta">
+    <div style="display:flex; gap:10px; align-items:center;">
       <span class="admin-badge">Power Monitoring</span>
-      <div id="mqtt-status">Connecting...</div>
+      <div id="mqtt-status" style="font-size:0.8rem; color:var(--muted);">Connecting...</div>
     </div>
   </header>
 
@@ -182,7 +158,7 @@ function render() {
     return `
     <div class="card ${d.status}">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-weight:bold; opacity:0.8; letter-spacing:1px;">📡 ${d.device}</span>
+        <span style="font-weight:bold; opacity:0.8;">📡 ${d.device}</span>
         <span style="font-size:0.7rem; font-weight:900; color:${d.status === 'online' ? 'var(--online)' : 'var(--offline)'}">
           ● ${d.status.toUpperCase()}
         </span>
@@ -203,7 +179,7 @@ function render() {
         </div>
       </div>
 
-      <div style="margin-top:10px; font-size:0.7rem; color:var(--muted); text-align:right; font-family:monospace;">
+      <div style="margin-top:10px; font-size:0.7rem; color:var(--muted); text-align:right;">
         SYNC: ${new Date(d.lastSeen).toLocaleTimeString()}
       </div>
     </div>`;
