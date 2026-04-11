@@ -27,7 +27,7 @@ body {
   margin: 0;
 }
 
-/* Centered Aesthetic Header */
+/* Centered & Aesthetic Header */
 .main-header {
   display: flex;
   flex-direction: column;
@@ -41,23 +41,38 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.logo-link img { transition: transform 0.3s ease; }
-.logo-link:hover img { transform: scale(1.05); }
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 5px;
+}
 
 .brand-title {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 800;
   letter-spacing: 2px;
-  margin: 10px 0;
   background: linear-gradient(135deg, #fff, var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+/* Text --- Status Row */
+.status-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 5px;
 }
 
 .admin-badge { 
   background: linear-gradient(135deg, var(--accent), var(--accent-dk)); 
   color: #fff; font-size: .65rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
+  letter-spacing: 1px;
 }
+
+#mqtt-status { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
 
 /* Device Grid Layout */
 .devices { 
@@ -76,7 +91,6 @@ body {
 }
 .card.offline { border-left-color: var(--offline); opacity: 0.8; }
 
-/* Horizontal Layout for Status */
 .status-row {
   display: flex;
   justify-content: space-between;
@@ -117,13 +131,14 @@ body {
 <body>
 
   <header class="main-header">
-    <a href="https://www.alto.com.ph/src/ALTO_SIGN-header.png" class="logo-link">
-      <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="80" height="80">
-    </a>
-    <h1 class="brand-title">PAVIA ERMS</h1>
-    <div style="display:flex; gap:10px; align-items:center;">
+    <div class="header-row">
+      <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="60" height="60">
+      <h1 class="brand-title">PAVIA ERMS</h1>
+    </div>
+
+    <div class="status-meta-row">
       <span class="admin-badge">Power Monitoring</span>
-      <div id="mqtt-status" style="font-size:0.8rem; color:var(--muted);">Connecting...</div>
+      <div id="mqtt-status">NETWORK INITIALIZING...</div>
     </div>
   </header>
 
