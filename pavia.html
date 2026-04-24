@@ -8,15 +8,15 @@
 <style>
 /* Using established Azure Blue theme */
 :root {
-  --accent:     #1E88E5;
-  --accent-dk:  #0d47a1;
-  --bg:         #07090f;
-  --bg2:        rgba(12,18,32,0.95);
-  --text:       #ffffff;
-  --online:     #4caf50;
-  --offline:    #f44336;
-  --radius:     18px;
-  --muted:      rgba(255,255,255,0.6);
+  --accent:      #1E88E5;
+  --accent-dk:   #0d47a1;
+  --bg:          #07090f;
+  --bg2:         rgba(12,18,32,0.95);
+  --text:        #ffffff;
+  --online:      #4caf50;
+  --offline:     #f44336;
+  --radius:      18px;
+  --muted:       rgba(255,255,255,0.6);
 }
 
 body { 
@@ -27,16 +27,23 @@ body {
   margin: 0;
 }
 
-/* Centered & Aesthetic Header */
+/* Centered & Aesthetic Header with Background Image */
 .main-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: var(--bg2);
-  border: 1px solid rgba(30,136,229,0.2);
+  
+  /* --- Background Image Logic --- */
+  /* We use a dark gradient overlay so the white text remains readable */
+  background: linear-gradient(rgba(7, 9, 15, 0.7), rgba(7, 9, 15, 0.7)), url('bg.jpg');
+  background-size: cover;
+  background-position: center;
+  /* ------------------------------ */
+
+  border: 1px solid rgba(30,136,229,0.3);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 40px 24px; /* Increased padding to show more of the background */
   margin-bottom: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
@@ -49,7 +56,7 @@ body {
 }
 
 .brand-title {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 800;
   letter-spacing: 2px;
   background: linear-gradient(135deg, #fff, var(--accent));
@@ -72,7 +79,7 @@ body {
   letter-spacing: 1px;
 }
 
-#mqtt-status { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+#mqtt-status { font-size: 0.8rem; color: #fff; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
 /* Device Grid Layout */
 .devices { 
