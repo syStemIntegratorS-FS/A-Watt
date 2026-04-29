@@ -11,7 +11,7 @@
   --accent:      #206e48;
   --accent-dk:   #206e48;
   --bg:          #07090f;
-  --bg2:         rgba(12,18,32,0.95);
+  --bg2:         #0c1338;
   --text:        #ffffff;
   --online:      #4caf50;
   --offline:     #f44336;
@@ -71,15 +71,29 @@ body {
   align-items: center;
   gap: 12px;
   margin-top: 5px;
+  background-color: #4b8a49; 
+  border: 3px solid 4b8a49;
+  border-radius: 12px;
+  
 }
 
 .admin-badge { 
-  background: linear-gradient(135deg, var(--accent), var(--accent-dk)); 
-  color: #fff; font-size: .65rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
-  letter-spacing: 1px;
+background: linear-gradient(135deg, var(--accent), var(--accent-dk)); 
+color: #fff;
+font-size: 1rem; 
+font-weight: 700; 
+padding: 6px 12px; 
+border-radius: 10px; 
+text-transform: uppercase;
+letter-spacing: 3px;
 }
 
-#mqtt-status { font-size: 0.8rem; color: #fff; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+#mqtt-status { 
+  font-size: 0.8rem; 
+  color: #fff; 
+  font-weight: 600; 
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  margin: 8px ;}
 
 /* Device Grid Layout */
 .devices { 
@@ -144,7 +158,7 @@ body {
     </div>
 
     <div class="status-meta-row">
-      <span class="admin-badge">Power Monitoring</span>
+      <span class="admin-badge">A-Watt </span>
       <div id="mqtt-status">NETWORK INITIALIZING...</div>
     </div>
   </header>
