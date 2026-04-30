@@ -2,242 +2,639 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A-Watt Pavia</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Pavia ERMS | Dark Green EMS</title>
 <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 <style>
-/* Using established Azure Blue theme */
+/* ========== DARK & GREEN THEME — FOREST NOIR ========== */
 :root {
-  --accent:      #206e48;
-  --accent-dk:   #206e48;
-  --bg:          #07090f;
-  --bg2:         #0c1338;
-  --text:        #ffffff;
-  --online:      #4caf50;
-  --offline:     #f44336;
-  --radius:      18px;
-  --muted:       rgba(255,255,255,0.6);
+  --accent-primary: #2ecc71;     /* vibrant green */
+  --accent-deep:    #1a8e4a;
+  --accent-glow:    #3ae374;
+  --bg-darkest:     #0a0e0c;     /* deep black-green */
+  --bg-surface:     #111a14;
+  --bg-card:        #0e1712;
+  --bg-elevated:    #16221a;
+  --border-green:   rgba(46, 204, 113, 0.25);
+  --border-glow:    rgba(46, 204, 113, 0.5);
+  --text-primary:   #e2f0e6;
+  --text-muted:     #8fbba3;
+  --green-online:   #2ecc71;
+  --red-offline:    #e74c3c;
+  --alert-blaze:    #ff6b4a;
+  --shadow-heavy:   0 20px 35px -12px rgba(0,0,0,0.8);
+  --radius-card:    22px;
 }
 
-body { 
-  font-family: 'Segoe UI', system-ui, sans-serif; 
-  background: var(--bg); 
-  color: var(--text); 
-  padding: 20px;
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Centered & Aesthetic Header with Background Image */
+body {
+  font-family: 'Inter', 'Segoe UI', 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-darkest);
+  color: var(--text-primary);
+  padding: 28px 24px;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* dark green vignette + subtle noise */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 20% 30%, rgba(20, 60, 35, 0.2), rgba(0, 0, 0, 0.85));
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* main containers above overlay */
+.main-header, .devices, .status-meta-row {
+  position: relative;
+  z-index: 2;
+}
+
+/* ========== HEADER – DARK & GREEN ========== */
 .main-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  
-  /* --- Background Image Logic --- */
-  /* We use a dark gradient overlay so the white text remains readable */
-  background: linear-gradient(rgba(7, 9, 15, 0.7), rgba(7, 9, 15, 0.7)), url('bg.jpg');
+  background: linear-gradient(135deg, rgba(8, 18, 12, 0.92), rgba(5, 14, 9, 0.96)), url('bg.jpg');
   background-size: cover;
-  background-position: center;
-  /* ------------------------------ */
-
-  border: 1px solid rgba(30,136,229,0.3);
-  border-radius: var(--radius);
-  padding: 40px 24px; /* Increased padding to show more of the background */
-  margin-bottom: 30px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  background-position: center 35%;
+  background-blend-mode: overlay;
+  border: 1px solid var(--border-green);
+  border-radius: var(--radius-card);
+  padding: 38px 28px;
+  margin-bottom: 42px;
+  box-shadow: var(--shadow-heavy), inset 0 1px 0 rgba(46, 204, 113, 0.15);
+  backdrop-filter: blur(1px);
 }
 
 .header-row {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 5px;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
 }
 
+/* Page title only - no A-Watt branding */
 .brand-title {
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   font-weight: 800;
-  letter-spacing: 2px;
-  background: linear-gradient(135deg, #fff, var(--accent));
+  letter-spacing: -0.8px;
+  background: linear-gradient(125deg, #d0f0da, var(--accent-primary), #6fcf97);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 18px rgba(46, 204, 113, 0.3);
   margin: 0;
 }
 
-/* Text --- Status Row */
+/* ===== OLD YOUTUBE STYLE FOR THE STATUS BADGE (admin-badge area) ===== */
+/* This replaces the boring admin-badge with a YouTube-inspired pill */
+.yt-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(135deg,#2ecc71, #0a0e0c  );   
+  padding: 6px 22px 6px 22px;
+  border-radius: 60px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 12px rgba(0,0,0,0.5);
+  transition: transform 0.2s ease;
+}
+
+.yt-status-badge:hover {
+  transform: scale(1.02);
+}
+
+/* "A" like old youtube */
+.yt-badge-letter {
+  font-size: 1.5rem;
+  font-weight: 900;
+  font-family: 'Impact', 'Arial Black', 'Segoe UI Black', sans-serif;
+  letter-spacing: -1px;
+  color: white;
+  text-shadow: 2px 2px 0 #7a0a0e;
+  line-height: 1;
+}
+
+.yt-badge-dash {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: white;
+  text-shadow: 1px 1px 0 #7a0a0e;
+  margin: 0 -2px;
+}
+
+.yt-badge-watt {
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  letter-spacing: 1px;
+  color: white;
+  text-shadow: 1px 1px 0 #990000;
+  text-transform: uppercase;
+}
+
+/* The online status next to it - transparent background + border */
+.mqtt-status-online {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #bdf2c6;
+  background: transparent;
+  padding: 6px 20px;
+  border-radius: 60px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+  border: 1.5px solid rgba(46, 204, 113, 0.7);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mqtt-status-online:hover {
+  border-color: #2ecc71;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.green-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #2ecc71;
+  border-radius: 50%;
+  box-shadow: 0 0 4px #2ecc71;
+  animation: pulse-green 1.2s infinite;
+}
+
+/* status meta row container */
 .status-meta-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 5px;
-  background-color: #4b8a49; 
-  border: 5px solid #206E48;
-  border-radius: 19px;
-  
+  gap: 20px;
+  margin-top: 16px;
+  background: rgba(0, 15, 8, 0.5);
+  backdrop-filter: blur(12px);
+  border-radius: 80px;
+  padding: 8px 24px;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.admin-badge { 
-background: linear-gradient(135deg, var(--accent), var(--accent-dk)); 
-color: #fff;
-font-size: 1rem; 
-font-weight: 700; 
-padding: 7px 13px; 
-border-radius: 19px; 
-border: 2px solid #206E48
-text-transform: uppercase;
-letter-spacing: 3px;
+/* ========== DEVICE GRID – DARK CARD STYLE ========== */
+.devices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+  gap: 28px;
 }
 
-#mqtt-status { 
-  font-size: 0.8rem; 
-  color: #fff; 
-  font-weight: 600; 
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  margin: 8px ;}
-
-/* Device Grid Layout */
-.devices { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
-  gap: 20px; 
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(3px);
+  border: 1px solid var(--border-green);
+  border-radius: var(--radius-card);
+  padding: 22px 24px;
+  border-left: 8px solid var(--green-online);
+  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  box-shadow: 0 15px 30px -12px black;
+  position: relative;
+  overflow: hidden;
 }
 
-.card { 
-  background: var(--bg2); 
-  border: 1px solid rgba(30,136,229,0.2); 
-  border-radius: var(--radius); 
-  padding: 20px; 
-  border-left: 6px solid var(--online); 
-  transition: 0.3s;
+/* subtle neon glow effect on cards */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+  opacity: 0.4;
 }
-.card.offline { border-left-color: var(--offline); opacity: 0.8; }
 
-.status-row {
+.card.offline {
+  border-left-color: var(--red-offline);
+  opacity: 0.85;
+  background: #0d1812;
+  filter: grayscale(0.05);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(46, 204, 113, 0.6);
+  box-shadow: 0 24px 38px -14px black;
+}
+
+/* header inside card */
+.device-header-flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255,255,255,0.03);
-  padding: 15px;
-  border-radius: 12px;
-  margin-top: 15px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.status-pill {
+.device-name {
+  font-weight: 700;
+  font-size: 1.3rem;
+  background: rgba(30, 65, 45, 0.6);
+  padding: 5px 16px;
+  border-radius: 60px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.2px;
+  backdrop-filter: blur(4px);
+  border: 0.5px solid rgba(70, 200, 110, 0.4);
+}
+
+.device-status {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 50px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.device-status.online {
+  color: var(--green-online);
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.5);
+}
+
+.device-status.offline {
+  color: var(--red-offline);
+}
+
+/* SENSORS ROW – dark & green accent */
+.sensor-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(5, 15, 9, 0.7);
+  border-radius: 20px;
+  padding: 16px 12px;
+  margin: 15px 0 12px 0;
+  gap: 12px;
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.sensor-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
+  gap: 6px;
 }
 
-.status-val { font-size: 1.1rem; font-weight: 800; }
-.status-lbl { font-size: 0.65rem; text-transform: uppercase; opacity: 0.6; margin-top: 4px; }
-.env { color: var(--accent); }
-
-/* Blinking Door Logic */
-.door-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
-.door-icon { font-size: 1.5rem; }
-
-.breached .door-icon { 
-  color: var(--offline); 
-  animation: blink-red 0.8s infinite; 
+.sensor-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  background: linear-gradient(145deg, #c4f0cf, #80e0a0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 1px;
 }
-.breached .status-val { color: var(--offline); }
 
-@keyframes blink-red { 
-  0%, 100% { opacity: 1; transform: scale(1); } 
-  50% { opacity: 0.3; transform: scale(1.2); } 
+.sensor-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+
+/* DOOR SECTION (Blinking breach) */
+.door-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  transition: all 0.1s;
+}
+
+.door-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 6px black);
+}
+
+.door-text {
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-top: 5px;
+}
+
+.breached .door-icon {
+  color: var(--alert-blaze);
+  animation: doorBlink 0.65s infinite ease-in-out;
+  text-shadow: 0 0 5px #ff7b4a;
+}
+
+.breached .door-text {
+  color: #ff8a66;
+  animation: fadePulse 0.65s infinite;
+}
+
+@keyframes doorBlink {
+  0% { opacity: 1; transform: scale(1); text-shadow: 0 0 0px #ff7a4a; }
+  50% { opacity: 0.7; transform: scale(1.18); text-shadow: 0 0 12px #ff5722; }
+  100% { opacity: 1; transform: scale(1); text-shadow: 0 0 0px; }
+}
+
+@keyframes fadePulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.65; }
+  100% { opacity: 1; }
+}
+
+/* timestamp line */
+.timestamp-footer {
+  margin-top: 15px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: right;
+  border-top: 1px dashed rgba(70, 140, 90, 0.35);
+  padding-top: 10px;
+  font-family: monospace;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* responsive */
+@media (max-width: 560px) {
+  body { padding: 16px; }
+  .brand-title { font-size: 1.8rem; }
+  .sensor-value { font-size: 1.2rem; }
+  .card { padding: 18px; }
+  .sensor-panel { flex-wrap: wrap; }
+  .yt-status-badge { padding: 4px 16px; }
+  .yt-badge-letter { font-size: 1.2rem; }
+  .yt-badge-watt { font-size: 0.9rem; }
+  .mqtt-status-online { font-size: 0.7rem; padding: 4px 14px; }
+}
+
+@keyframes pulse-green {
+  0% { opacity: 0.4; transform: scale(0.8);}
+  100% { opacity: 1; transform: scale(1.2);}
 }
 </style>
 </head>
 <body>
 
-  <header class="main-header">
-    <div class="header-row">
-      <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="60" height="60">
-      <h1 class="brand-title">PAVIA ERMS</h1>
+<header class="main-header">
+  <div class="header-row">
+    <img src="https://www.alto.com.ph/src/ALTO_SIGN-header.png" alt="ALTO" width="58" height="58" style="filter: drop-shadow(0 2px 10px #2ecc71); border-radius: 14px;">
+    <h1 class="brand-title">PAVIA ERMS</h1>
+  </div>
+  
+  <!-- status row with YOUTUBE-OLD-STYLE BADGE + transparent border online status -->
+  <div class="status-meta-row">
+    <!-- this is the "A-Watt" part styled exactly like old YouTube logo -->
+    <div class="yt-status-badge">
+      <span class="yt-badge-letter">A</span>
+      <span class="yt-badge-dash">-</span>
+      <span class="yt-badge-watt">Watt</span>
     </div>
-
-    <div class="status-meta-row">
-      <span class="admin-badge">A-Watt </span>
-      <div id="mqtt-status">NETWORK INITIALIZING...</div>
+    <!-- online status: transparent background, green border, as requested -->
+    <div id="mqtt-status" class="mqtt-status-online">
+      <span class="green-pulse"></span> Online
     </div>
-  </header>
+  </div>
+  <div style="font-size: 0.7rem; margin-top: 12px; font-weight: 500; opacity: 0.8; letter-spacing: 1px;">Realtime Status</div>
+</header>
 
-  <div id="grid" class="devices"></div>
+<div id="grid" class="devices"></div>
 
 <script>
-const CFG = {
+// ========== DARK & GREEN MQTT MONITOR ==========
+// Topic "powerstatus" :: format "prefix|deviceName|temperature|doorState|humidity"
+// Example: "MSG|SERVER-01|23.5|ACTIVE|58%"
+
+const CONFIG = {
   broker: "wss://b01384c7f4aa43c2a7950f4fd7c8bb18.s1.eu.hivemq.cloud:8884/mqtt",
   topic: "powerstatus",
-  user: "subscriber",
-  pass: "Admin1234"
+  username: "subscriber",
+  password: "Admin1234"
 };
 
-let devices = new Map();
+let devicesMap = new Map();
+let mqttClient = null;
+const statusElement = document.getElementById('mqtt-status');
 
-function parse(raw) {
-  const p = raw.split('|').map(s => s.trim());
-  return { 
-    device: p[1] || 'Unknown', 
-    temp: p[2] || '--', 
-    door: p[3] || 'NORMAL', 
-    humid: p[4] || '--',
-    lastSeen: Date.now(),
-    status: 'online'
-  };
+// update MQTT status text while keeping the same styling (transparent background + border)
+function setMqttStatus(message, isError = false) {
+  if (statusElement) {
+    if (!isError) {
+      statusElement.innerHTML = `<span class="green-pulse"></span> ${message}`;
+    } else {
+      statusElement.innerHTML = `<span style="display:inline-block; width:8px; height:8px; background:#e74c3c; border-radius:50%; margin-right:8px; animation:none;"></span> ${message}`;
+    }
+  }
 }
 
-function render() {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = [...devices.values()].map(d => {
-    const isBreached = d.door === 'ACTIVE';
-    return `
-    <div class="card ${d.status}">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-weight:bold; opacity:0.8;">📡 ${d.device}</span>
-        <span style="font-size:0.7rem; font-weight:900; color:${d.status === 'online' ? 'var(--online)' : 'var(--offline)'}">
-          ● ${d.status.toUpperCase()}
-        </span>
-      </div>
-      
-      <div class="status-row">
-        <div class="status-pill" style="border-right: 1px solid rgba(255,255,255,0.1);">
-          <span class="status-val env">${d.temp}</span>
-          <span class="status-lbl">Temp</span>
-        </div>
-        <div class="status-pill" style="border-right: 1px solid rgba(255,255,255,0.1);">
-          <span class="status-val env">${d.humid}</span>
-          <span class="status-lbl">Humid</span>
-        </div>
-        <div class="door-container ${isBreached ? 'breached' : ''}">
-          <span class="door-icon">🚪</span>
-          <span class="status-val" style="font-size:0.8rem;">${isBreached ? 'BREACHED' : 'SECURED'}</span>
-        </div>
-      </div>
+// parse raw message payload
+function parseMessage(rawString) {
+  try {
+    const parts = rawString.toString().split('|').map(p => p.trim());
+    const deviceId = parts[1] || 'edge-sensor';
+    let rawTemp = parts[2] || '--';
+    let doorRaw = parts[3] || 'NORMAL';
+    let rawHum = parts[4] || '--';
+    
+    let temperatureDisplay = rawTemp;
+    if (!isNaN(parseFloat(rawTemp)) && rawTemp !== '--') temperatureDisplay = `${rawTemp}°C`;
+    let humidityDisplay = rawHum;
+    if (!isNaN(parseFloat(rawHum)) && rawHum !== '--') humidityDisplay = `${rawHum}%`;
+    
+    const doorState = (doorRaw.toUpperCase() === 'ACTIVE') ? 'ACTIVE' : 'NORMAL';
+    
+    return {
+      device: deviceId,
+      temp: temperatureDisplay,
+      door: doorState,
+      humid: humidityDisplay,
+      lastSeen: Date.now(),
+      status: 'online'
+    };
+  } catch (err) {
+    console.warn("parse error", err);
+    return null;
+  }
+}
 
-      <div style="margin-top:10px; font-size:0.7rem; color:var(--muted); text-align:right;">
-        SYNC: ${new Date(d.lastSeen).toLocaleTimeString()}
-      </div>
+function escapeHtml(str) { 
+  if(!str) return ''; 
+  return str.replace(/[&<>]/g, function(m){ 
+    if(m==='&') return '&amp;'; 
+    if(m==='<') return '&lt;'; 
+    if(m==='>') return '&gt;'; 
+    return m;
+  }); 
+}
+
+// render dashboard with device cards
+function renderDashboard() {
+  const container = document.getElementById('grid');
+  if (!container) return;
+  
+  if (devicesMap.size === 0) {
+    container.innerHTML = `<div style="grid-column:1/-1; background: #0f1913; border-radius: 38px; padding: 60px 24px; text-align: center; border: 1px solid #2ecc7133;">
+      <span style="font-size: 3rem;">🌲🌙</span>
+      <h2 style="margin: 16px 0 8px; color:#bef5cf;">awaiting green data stream</h2>
+      <p style="color: #98c9a8;">MQTT topic <code style="background:#1a3524; padding: 5px 12px; border-radius: 48px;">powerstatus</code> will populate devices</p>
+      <small style="opacity: 0.7;">listening on HIVEMQ secure broker</small>
     </div>`;
-  }).join('');
+    return;
+  }
+  
+  let html = '';
+  for (const [deviceId, dev] of devicesMap.entries()) {
+    const isBreached = (dev.door === 'ACTIVE');
+    const isOffline = (dev.status === 'offline');
+    const timeString = new Date(dev.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second:'2-digit' });
+    
+    html += `
+      <div class="card ${isOffline ? 'offline' : ''}">
+        <div class="device-header-flex">
+          <div class="device-name">
+            <span>🟢</span> ${escapeHtml(dev.device)}
+          </div>
+          <div class="device-status ${isOffline ? 'offline' : 'online'}">
+            ${isOffline ? '● OFFLINE' : '● LIVE'}
+          </div>
+        </div>
+        
+        <div class="sensor-panel">
+          <div class="sensor-item">
+            <span class="sensor-value">${escapeHtml(dev.temp)}</span>
+            <span class="sensor-label">🌡️ TEMPERATURE</span>
+          </div>
+          <div class="sensor-item">
+            <span class="sensor-value">${escapeHtml(dev.humid)}</span>
+            <span class="sensor-label">💧 HUMIDITY</span>
+          </div>
+          <div class="door-module ${isBreached ? 'breached' : ''}">
+            <span class="door-icon">${isBreached ? '🚨🚪' : '🔒🚪'}</span>
+            <span class="door-text">${isBreached ? 'BREACH - ALERT' : 'SECURED'}</span>
+          </div>
+        </div>
+        
+        <div class="timestamp-footer">
+          <span>🕘 last sync</span>
+          <span>${timeString} ${isOffline ? '⚠️ stale' : '✓'}</span>
+        </div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
 }
 
-const client = mqtt.connect(CFG.broker, {username: CFG.user, password: CFG.pass});
-client.on('connect', () => {
-  document.getElementById('mqtt-status').innerText = '🟢 NETWORK LIVE';
-  client.subscribe(CFG.topic);
-});
-client.on('message', (t, m) => {
-  const data = parse(m.toString());
-  devices.set(data.device, data);
-  render();
-});
+// offline watcher: mark device offline if no update > 6.5 sec
+function startOfflineWatcher() {
+  setInterval(() => {
+    let needUpdate = false;
+    const now = Date.now();
+    for (let [key, device] of devicesMap.entries()) {
+      const wasOffline = (device.status === 'offline');
+      const isOfflineNow = (now - device.lastSeen > 6500);
+      if (isOfflineNow && !wasOffline) {
+        device.status = 'offline';
+        needUpdate = true;
+      } else if (!isOfflineNow && wasOffline) {
+        device.status = 'online';
+        needUpdate = true;
+      }
+    }
+    if (needUpdate) renderDashboard();
+  }, 2500);
+}
 
-setInterval(() => {
-  devices.forEach(d => { if(Date.now() - d.lastSeen > 5000) d.status = 'offline'; });
-  render();
-}, 2000);
+// MQTT connection
+function initMqttConnection() {
+  if (mqttClient && mqttClient.connected) {
+    try { mqttClient.end(true); } catch(e) { }
+  }
+  
+  setMqttStatus("connecting to secure broker...");
+  
+  mqttClient = mqtt.connect(CONFIG.broker, {
+    username: CONFIG.username,
+    password: CONFIG.password,
+    reconnectPeriod: 4500,
+    connectTimeout: 12000,
+    clientId: `darkgreen_pavia_${Math.random().toString(36).substring(2, 9)}`,
+    clean: true
+  });
+  
+  mqttClient.on('connect', () => {
+    setMqttStatus("Online");
+    mqttClient.subscribe(CONFIG.topic, { qos: 0 }, (err) => {
+      if (err) console.warn("subscribe error", err);
+      else console.log("[MQTT] subscribed to", CONFIG.topic);
+    });
+  });
+  
+  mqttClient.on('message', (topic, payload) => {
+    try {
+      const raw = payload.toString();
+      if (!raw) return;
+      const parsed = parseMessage(raw);
+      if (parsed && parsed.device) {
+        parsed.status = 'online';
+        parsed.lastSeen = Date.now();
+        devicesMap.set(parsed.device, parsed);
+        renderDashboard();
+      }
+    } catch (err) {
+      console.error("message handling error", err);
+    }
+  });
+  
+  mqttClient.on('error', (err) => {
+    console.error("MQTT error:", err);
+    setMqttStatus("connection error • retrying", true);
+  });
+  
+  mqttClient.on('reconnect', () => {
+    setMqttStatus("reconnecting...", false);
+  });
+  
+  mqttClient.on('offline', () => {
+    setMqttStatus("offline mode • waiting", true);
+  });
+}
+
+// initialization
+window.addEventListener('DOMContentLoaded', () => {
+  initMqttConnection();
+  startOfflineWatcher();
+  
+  setTimeout(() => {
+    if (devicesMap.size === 0 && mqttClient && mqttClient.connected) {
+      renderDashboard();
+    }
+  }, 1200);
+});
 </script>
 </body>
 </html>
