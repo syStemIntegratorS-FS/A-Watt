@@ -6,7 +6,7 @@
 <title>Pavia ERMS | Dark Green EMS</title>
 <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 <style>
-/* ========== DARK & GREEN THEME — FOREST NOIR ========== */
+/* ========== DARK & GREEN THEME ========== */
 :root {
   --accent-primary: #2ecc71;     /* vibrant green */
   --accent-deep:    #1a8e4a;
@@ -41,7 +41,7 @@ body {
   position: relative;
 }
 
-/* dark green vignette + subtle noise */
+
 body::before {
   content: "";
   position: fixed;
@@ -54,13 +54,13 @@ body::before {
   z-index: 0;
 }
 
-/* main containers above overlay */
+
 .main-header, .devices, .status-meta-row {
   position: relative;
   z-index: 2;
 }
 
-/* ========== HEADER – DARK & GREEN ========== */
+
 .main-header {
   display: flex;
   flex-direction: column;
@@ -87,7 +87,7 @@ body::before {
   margin-bottom: 14px;
 }
 
-/* Page title only - no A-Watt branding */
+
 .brand-title {
   font-size: 2.8rem;
   font-weight: 800;
@@ -100,8 +100,6 @@ body::before {
   margin: 0;
 }
 
-/* ===== OLD YOUTUBE STYLE FOR THE STATUS BADGE (admin-badge area) ===== */
-/* This replaces the boring admin-badge with a YouTube-inspired pill */
 .yt-status-badge {
   display: inline-flex;
   align-items: center;
@@ -118,7 +116,6 @@ body::before {
   transform: scale(1.02);
 }
 
-/* "A" like old youtube */
 .yt-badge-letter {
   font-size: 1.5rem;
   font-weight: 900;
@@ -147,7 +144,7 @@ body::before {
   text-transform: uppercase;
 }
 
-/* The online status next to it - transparent background + border */
+
 .mqtt-status-online {
   font-size: 0.85rem;
   font-weight: 700;
@@ -181,7 +178,7 @@ body::before {
   animation: pulse-green 1.2s infinite;
 }
 
-/* status meta row container */
+
 .status-meta-row {
   display: flex;
   align-items: center;
@@ -197,7 +194,7 @@ body::before {
   justify-content: center;
 }
 
-/* ========== DEVICE GRID – DARK CARD STYLE ========== */
+/* ========== DEVICE GRID ========== */
 .devices {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
@@ -217,7 +214,6 @@ body::before {
   overflow: hidden;
 }
 
-/* subtle neon glow effect on cards */
 .card::after {
   content: '';
   position: absolute;
@@ -242,7 +238,6 @@ body::before {
   box-shadow: 0 24px 38px -14px black;
 }
 
-/* header inside card */
 .device-header-flex {
   display: flex;
   justify-content: space-between;
@@ -283,8 +278,6 @@ body::before {
 .device-status.offline {
   color: var(--red-offline);
 }
-
-/* SENSORS ROW – dark & green accent */
 .sensor-panel {
   display: flex;
   justify-content: space-between;
@@ -324,7 +317,6 @@ body::before {
   color: var(--text-muted);
 }
 
-/* DOOR SECTION (Blinking breach) */
 .door-module {
   display: flex;
   flex-direction: column;
@@ -367,7 +359,6 @@ body::before {
   100% { opacity: 1; }
 }
 
-/* timestamp line */
 .timestamp-footer {
   margin-top: 15px;
   font-size: 0.7rem;
@@ -380,7 +371,6 @@ body::before {
   justify-content: space-between;
 }
 
-/* responsive */
 @media (max-width: 560px) {
   body { padding: 16px; }
   .brand-title { font-size: 1.8rem; }
@@ -407,15 +397,13 @@ body::before {
     <h1 class="brand-title">PAVIA ERMS</h1>
   </div>
   
-  <!-- status row with YOUTUBE-OLD-STYLE BADGE + transparent border online status -->
+  
   <div class="status-meta-row">
-    <!-- this is the "A-Watt" part styled exactly like old YouTube logo -->
     <div class="yt-status-badge">
       <span class="yt-badge-letter">A</span>
       <span class="yt-badge-dash">-</span>
       <span class="yt-badge-watt">Watt</span>
     </div>
-    <!-- online status: transparent background, green border, as requested -->
     <div id="mqtt-status" class="mqtt-status-online">
       <span class="green-pulse"></span> Online
     </div>
@@ -440,8 +428,7 @@ const CONFIG = {
 let devicesMap = new Map();
 let mqttClient = null;
 const statusElement = document.getElementById('mqtt-status');
-
-// update MQTT status text while keeping the same styling (transparent background + border)
+  
 function setMqttStatus(message, isError = false) {
   if (statusElement) {
     if (!isError) {
@@ -452,7 +439,6 @@ function setMqttStatus(message, isError = false) {
   }
 }
 
-// parse raw message payload
 function parseMessage(rawString) {
   try {
     const parts = rawString.toString().split('|').map(p => p.trim());
@@ -492,7 +478,6 @@ function escapeHtml(str) {
   }); 
 }
 
-// render dashboard with device cards
 function renderDashboard() {
   const container = document.getElementById('grid');
   if (!container) return;
@@ -534,13 +519,13 @@ function renderDashboard() {
             <span class="sensor-label">💧 HUMIDITY</span>
           </div>
           <div class="door-module ${isBreached ? 'breached' : ''}">
-            <span class="door-icon">${isBreached ? '🚨🚪' : '🔒🚪'}</span>
-            <span class="door-text">${isBreached ? 'BREACH - ALERT' : 'SECURED'}</span>
+            <span class="door-icon">${isBreached ? '🚨' : '🔒'}</span>
+            <span class="door-text">${isBreached ? 'BREACHED - ALERT' : 'SECURED'}</span>
           </div>
         </div>
         
         <div class="timestamp-footer">
-          <span>🕘 last sync</span>
+          <span>🕘Telemetry</span>
           <span>${timeString} ${isOffline ? '⚠️ stale' : '✓'}</span>
         </div>
       </div>
